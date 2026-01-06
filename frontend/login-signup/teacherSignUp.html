@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Sign Up</title>
+  <link rel="stylesheet" type="text/css" href="/main-pages/style.css">
+  <script src="/scripts/accent-loader.js"></script>
+  <style>
+    body { font-family: Arial; background:white; color:#3e2723; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .container { background:#f9f9f9; padding:20px; border-radius:10px; width:380px; box-shadow:0 0 10px rgba(0,0,0,0.3); }
+    label { display:block; margin-top:10px; }
+    input { width:95%; padding:8px; margin-top:5px; border:1px solid #3e2723; border-radius:5px; }
+    button { width:100%; padding:10px; margin-top:15px; background: var(--accent-color); color:#3e2723; font-weight:bold; border:none; border-radius:5px; cursor:pointer; }
+    button:hover { background: color-mix(in srgb, var(--accent-color) 50%, black); }
+    .message { margin-top:10px; text-align:center; font-weight:bold; }
+    .back { display:block; text-align:center; margin-top:14px; color:#3e2723; text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Teacher Sign Up</h2>
+    <form id="teacherForm">
+      <label>First Name:</label>
+      <input type="text" id="tFirstName" required>
+      <label>Last Name:</label>
+      <input type="text" id="tLastName" required>
+      <label>Email:</label>
+      <input type="email" id="tEmail" required>
+      <label>Password:</label>
+      <input type="password" id="tPassword" required>
+        <button type="submit">Sign Up</button>
+    </form>
+    <div class="message" id="message"></div>
+    <a class="back" href="/main-pages/index.html">Go back</a>
+  </div>
+
+  <script>
+      document.getElementById("teacherForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const firstName = tFirstName.value.trim();
+        const lastName = tLastName.value.trim();
+        const email = tEmail.value.trim();
+        const password = tPassword.value;
+        const name = `${firstName} ${lastName}`.trim();
+        message.textContent = '';
+        try {
+          const res = await fetch('/api/auth/signup-coach', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name, email, password }) });
+          const data = await res.json();
+          if (!res.ok) { message.textContent = data.message || 'Signup failed'; message.style.color = 'red'; return; }
+          // store token for immediate use
+          if (data.token) localStorage.setItem('bowling_token', data.token);
+          message.textContent = 'Account created. Your coach code: ' + (data.user && data.user.coach_code ? data.user.coach_code : '—');
+          message.style.color = 'green';
+        } catch (err) { message.textContent = 'Error creating account'; message.style.color = 'red'; console.error(err); }
+      });
+  </script>
+</body>
+</html>
